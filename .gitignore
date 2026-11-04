@@ -1,0 +1,15 @@
+/data/
+/bin/
+/web/node_modules/
+/web/dist/
+*.db
+*.db-shm
+*.db-wal
+*.exe
+*.test
+coverage.out
+.env
+/.cache/
+*.tsbuildinfo
+!/docs/
+!/docs/**
