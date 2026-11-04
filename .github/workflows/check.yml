@@ -1,0 +1,45 @@
+name: checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.3'
+      - run: go mod download
+      - run: test -z "$(gofmt -l cmd internal pkg)"
+      - run: go vet ./...
+      - run: go test -race ./...
+      - run: go build ./...
+  dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm --prefix web ci --no-audit --no-fund
+      - run: npm --prefix web run build
+  compose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker compose config --quiet
+      - run: docker compose up --build --wait
+      - run: curl --fail --retry 30 --retry-delay 1 --retry-all-errors http://127.0.0.1:8080/ready
+      - name: Verify replica-backed round trip
+        run: |
+          file_id=$(curl --fail -H 'Content-Type: application/octet-stream' --data-binary @README.md 'http://127.0.0.1:8080/api/v1/files?name=README.md' | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+          curl --fail "http://127.0.0.1:8080/api/v1/files/$file_id/download" -o /tmp/restored.md
+          cmp README.md /tmp/restored.md
+          curl --fail http://127.0.0.1:5173/
+      - if: always()
+        run: docker compose logs
+      - if: always()
+        run: docker compose down
