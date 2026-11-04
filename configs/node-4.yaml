@@ -1,0 +1,9 @@
+listen: 127.0.0.1:9004
+node_id: storage-04
+advertise_address: http://127.0.0.1:9004
+coordinator_address: http://127.0.0.1:8080
+data_dir: data/node-04
+capacity_bytes: 10737418240
+internal_token: local-demo-token-change-me
+heartbeat_interval: 2s
+failure_timeout: 8s
