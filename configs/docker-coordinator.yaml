@@ -1,0 +1,12 @@
+listen: 0.0.0.0:8080
+database: /data/metadata.db
+chunk_size: 4194304
+replication_factor: 3
+heartbeat_interval: 2s
+failure_timeout: 8s
+repair_interval: 2s
+allowed_node_addresses:
+  - http://storage-node-1:9001
+  - http://storage-node-2:9001
+  - http://storage-node-3:9001
+  - http://storage-node-4:9001
