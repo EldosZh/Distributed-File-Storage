@@ -1,0 +1,8 @@
+listen: 0.0.0.0:9001
+node_id: storage-02
+advertise_address: http://storage-node-2:9001
+coordinator_address: http://coordinator:8080
+data_dir: /data
+capacity_bytes: 10737418240
+heartbeat_interval: 2s
+failure_timeout: 8s
