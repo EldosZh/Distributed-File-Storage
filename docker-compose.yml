@@ -1,0 +1,71 @@
+name: distributed-file-storage
+x-node: &node
+  build:
+    context: .
+    dockerfile: Dockerfile.node
+  environment:
+    DFS_INTERNAL_TOKEN: ${DFS_INTERNAL_TOKEN:-local-demo-token-change-me}
+  depends_on:
+    coordinator:
+      condition: service_healthy
+  healthcheck:
+    test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9001/health"]
+    interval: 3s
+    timeout: 2s
+    retries: 10
+  restart: unless-stopped
+services:
+  coordinator:
+    build:
+      context: .
+      dockerfile: Dockerfile.coordinator
+    ports: ["127.0.0.1:8080:8080"]
+    environment:
+      DFS_INTERNAL_TOKEN: ${DFS_INTERNAL_TOKEN:-local-demo-token-change-me}
+    volumes:
+      - metadata:/data
+      - ./configs/docker-coordinator.yaml:/config/coordinator.yaml:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"]
+      interval: 3s
+      timeout: 2s
+      retries: 10
+    restart: unless-stopped
+  storage-node-1:
+    <<: *node
+    volumes:
+      - node1:/data
+      - ./configs/docker-node-1.yaml:/config/node.yaml:ro
+  storage-node-2:
+    <<: *node
+    volumes:
+      - node2:/data
+      - ./configs/docker-node-2.yaml:/config/node.yaml:ro
+  storage-node-3:
+    <<: *node
+    volumes:
+      - node3:/data
+      - ./configs/docker-node-3.yaml:/config/node.yaml:ro
+  storage-node-4:
+    <<: *node
+    profiles: ["replacement"]
+    volumes:
+      - node4:/data
+      - ./configs/docker-node-4.yaml:/config/node.yaml:ro
+  dashboard:
+    build: ./web
+    ports: ["127.0.0.1:5173:80"]
+    depends_on:
+      coordinator:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 5s
+      timeout: 2s
+      retries: 10
+volumes:
+  metadata:
+  node1:
+  node2:
+  node3:
+  node4:
