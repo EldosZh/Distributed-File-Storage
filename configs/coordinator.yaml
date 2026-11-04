@@ -1,0 +1,19 @@
+listen: 127.0.0.1:8080
+database: data/metadata.db
+internal_token: local-demo-token-change-me
+chunk_size: 4194304
+replication_factor: 3
+virtual_nodes: 128
+heartbeat_interval: 2s
+failure_timeout: 8s
+repair_interval: 2s
+repair_workers: 4
+max_retries: 5
+gc_grace: 1h
+max_upload_bytes: 1099511627776
+max_concurrent_operations: 8
+allowed_node_addresses:
+  - http://127.0.0.1:9001
+  - http://127.0.0.1:9002
+  - http://127.0.0.1:9003
+  - http://127.0.0.1:9004
